@@ -83,7 +83,7 @@ select.sort:focus{outline:none;border-color:var(--aqua)}
 .btn-filters .badge{background:var(--coral);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:1px 7px}
 
 .filters{max-height:0;overflow:hidden;transition:max-height .35s ease}
-.filters.open{max-height:640px}
+.filters.open{max-height:min(640px, 70vh);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .filters-pad{padding:6px 0 16px}
 .fgroup{padding:12px 0;border-top:1px solid var(--line)}
 .fgroup:first-child{border-top:none}
