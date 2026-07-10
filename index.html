@@ -127,7 +127,8 @@ select.sort:focus{outline:none;border-color:var(--aqua)}
 .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--aqua))}
 .card:hover{transform:translateY(-4px);border-color:var(--c,var(--aqua));box-shadow:var(--shadow)}
 .card:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
-.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.card-top{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card-top .nights{margin-left:auto}
 .ship{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--c,var(--aqua))}
 .nights{font-family:"Archivo",sans-serif;font-weight:800;font-size:13px;color:var(--foam);background:rgba(255,255,255,.06);
   border:1px solid var(--line2);border-radius:20px;padding:3px 10px;white-space:nowrap}
@@ -151,7 +152,7 @@ select.sort:focus{outline:none;border-color:var(--aqua)}
 .src-badge.src-comp{background:rgba(242,200,121,.18);color:var(--sand);border:1px solid rgba(242,200,121,.35)}
 .src-badge.src-casino{background:rgba(255,90,69,.15);color:var(--coral);border:1px solid rgba(255,90,69,.3)}
 .src-badge.src-both{background:rgba(51,211,196,.12);color:var(--aqua);border:1px solid rgba(51,211,196,.3)}
-.card .src-badge{position:absolute;top:14px;right:14px}
+.card .src-badge{flex:none}
 .sheet .src-badge{margin-left:12px;vertical-align:middle}
 
 .empty{text-align:center;padding:70px 20px;color:var(--muted)}
@@ -2928,16 +2929,12 @@ document.getElementById('heroStats').innerHTML=[
 // filter state
 const state={search:"",sort:"date-asc",source:new Set(),region:new Set(),embark:new Set(),nights:new Set(),season:new Set(),months:new Set(),dateFrom:"",dateTo:"",ship:new Set()};
 
-function fmtDate(c){return `${MONTHS[c.month]} ${c.day}, ${c.year}`;}
-function returnDate(c){
-  const d=new Date(Date.UTC(c.year,c.month-1,c.day)); d.setUTCDate(d.getUTCDate()+c.nights);
-  return `${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
-}
-function returnDateShort(c){
-  const d=new Date(Date.UTC(c.year,c.month-1,c.day)); d.setUTCDate(d.getUTCDate()+c.nights);
-  const y=d.getUTCFullYear();
-  return `${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}`+(y!==c.year?`, ${y}`:'');
-}
+const WDAY=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function dayName(dt){return WDAY[dt.getUTCDay()];}
+function fmtDate(c){const dt=new Date(Date.UTC(c.year,c.month-1,c.day));return `${dayName(dt)}, ${MONTHS[c.month]} ${c.day}, ${c.year}`;}
+function endDt(c){const d=new Date(Date.UTC(c.year,c.month-1,c.day));d.setUTCDate(d.getUTCDate()+c.nights);return d;}
+function returnDate(c){const d=endDt(c);return `${dayName(d)}, ${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;}
+function returnDateShort(c){const d=endDt(c);const y=d.getUTCFullYear();return `${dayName(d)}, ${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}`+(y!==c.year?`, ${y}`:'');}
 
 // build filter chips
 function chip(container,label,value,set,colorAttr){
@@ -2997,6 +2994,7 @@ searchEl.addEventListener('input',e=>{state.search=e.target.value.trim().toLower
 document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
 const filtersEl=document.getElementById('filters'),toggleEl=document.getElementById('toggleFilters');
 toggleEl.onclick=()=>{const open=filtersEl.classList.toggle('open');toggleEl.setAttribute('aria-expanded',open);};
+document.addEventListener('click',e=>{if(filtersEl.classList.contains('open')&&!e.target.closest('.controls')){filtersEl.classList.remove('open');toggleEl.setAttribute('aria-expanded','false');}});
 function clearAll(){state.source.clear();state.region.clear();state.embark.clear();state.nights.clear();state.season.clear();state.months.clear();state.ship.clear();
   state.dateFrom="";state.dateTo="";
   if(typeof dateFromEl!=='undefined'){dateFromEl.value="";dateToEl.value="";syncDateUI();}
@@ -3041,9 +3039,9 @@ function srcBadge(c){
 function cardHTML(c,i){
   const chips=c.ports.map(p=>`<span class="pchip"><span class="fl">${PORTS[p].flag}</span>${PORTS[p].name.split(',')[0]}</span>`).join('');
   return `<article class="card" data-c="${c.region}" data-i="${i}" tabindex="0" role="button" aria-label="${c.itinerary}, ${c.nights} nights on ${c.ship}">
-    ${srcBadge(c)}
     <div class="card-top">
       <span class="ship">${c.ship}</span>
+      ${srcBadge(c)}
       <span class="nights">${c.nights} NT</span>
     </div>
     <h3>${c.itinerary}</h3>
@@ -3114,8 +3112,7 @@ const PORT_HOURS={
   saint_john:["9:30 AM","8:00 PM"], halifax:["8:00 AM","5:00 PM"]
 };
 const EMBARK_TIMES={miami:["5:00 PM","6:30 AM"], san_juan:["8:00 PM","6:30 AM"], nyc:["5:00 PM","7:00 AM"]};
-const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-function fmtDayDate(dt){return WD[dt.getUTCDay()]+" · "+MONTHS[dt.getUTCMonth()+1]+" "+dt.getUTCDate();}
+function fmtDayDate(dt){return WDAY[dt.getUTCDay()]+" · "+MONTHS[dt.getUTCMonth()+1]+" "+dt.getUTCDate();}
 
 // Build a typical day-by-day schedule (embark → middle days → disembark).
 function buildSchedule(c){
