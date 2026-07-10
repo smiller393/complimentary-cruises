@@ -1,0 +1,2927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complimentary Voyages · Sail Selector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;0,900;1,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#06182b;        /* deep sea night */
+  --abyss:#0b2942;      /* panel */
+  --abyss2:#103351;     /* raised panel */
+  --line:#14324c;
+  --line2:#1b405f;
+  --foam:#eef5f8;       /* primary text */
+  --muted:#8ba6bd;      /* secondary text */
+  --muted2:#5f7d97;
+  --aqua:#33d3c4;       /* Caribbean water */
+  --aqua-deep:#12a99b;
+  --coral:#ff5a45;      /* sunset */
+  --coral-deep:#e23c2c;
+  --sand:#f2c879;       /* gold */
+  --pink:#ff8fb0;
+  --violet:#b59bff;
+  --rust:#ff9d5c;
+  --lime:#7fd88a;
+  --shadow: 0 18px 50px -20px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--ink);color:var(--foam);
+  font-family:"Inter",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.5;
+  overflow-x:hidden;
+}
+/* ---------- HERO ---------- */
+.hero{position:relative;overflow:hidden;padding:0 20px;border-bottom:1px solid var(--line2)}
+.hero-sky{position:absolute;inset:0;z-index:0;
+  background:
+   radial-gradient(120% 90% at 78% -10%, rgba(255,157,92,.55), rgba(255,90,69,.28) 34%, rgba(11,41,66,0) 62%),
+   linear-gradient(180deg,#0a2036 0%, #0b2942 55%, #06182b 100%);
+}
+.hero-sun{position:absolute;top:-90px;right:12%;width:340px;height:340px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #ffd089, #ff7a4d 46%, rgba(255,90,69,0) 70%);
+  filter:blur(4px);opacity:.9;z-index:0}
+.hero-waves{position:absolute;left:0;right:0;bottom:-1px;height:120px;z-index:0;opacity:.5}
+.hero-inner{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:46px 0 30px}
+.eyebrow{font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.32em;text-transform:uppercase;
+  color:var(--sand);display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--sand);display:inline-block}
+h1.title{font-family:"Archivo",sans-serif;font-weight:900;letter-spacing:-.02em;line-height:.94;
+  margin:0;font-size:clamp(38px,7.4vw,86px);text-transform:uppercase}
+h1.title .thin{-webkit-text-stroke:1.4px var(--foam);color:transparent;font-weight:800}
+h1.title .em{color:var(--coral)}
+.lede{max-width:620px;margin:18px 0 0;color:#cfe0ec;font-size:clamp(15px,1.7vw,18px)}
+.lede b{color:var(--foam);font-weight:600}
+.stats{display:flex;flex-wrap:wrap;gap:26px;margin-top:26px}
+.stat .n{font-family:"Archivo",sans-serif;font-weight:800;font-size:30px;line-height:1;color:var(--aqua)}
+.stat .l{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+
+/* ---------- CONTROLS ---------- */
+.controls{position:sticky;top:0;z-index:40;background:rgba(6,24,43,.86);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line2)}
+.controls-inner{max-width:1200px;margin:0 auto;padding:14px 20px}
+.searchrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.search{position:relative;flex:1 1 300px;min-width:220px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.search input{width:100%;background:var(--abyss);border:1px solid var(--line2);color:var(--foam);
+  padding:12px 14px 12px 42px;border-radius:12px;font-size:15px;font-family:inherit}
+.search input:focus{outline:none;border-color:var(--aqua);box-shadow:0 0 0 3px rgba(51,211,196,.16)}
+.search input::placeholder{color:var(--muted2)}
+.sortwrap{position:relative}
+select.sort{appearance:none;background:var(--abyss);border:1px solid var(--line2);color:var(--foam);
+  padding:12px 38px 12px 14px;border-radius:12px;font-size:14px;font-family:inherit;cursor:pointer}
+select.sort:focus{outline:none;border-color:var(--aqua)}
+.sortwrap::after{content:"▾";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.btn-filters{background:var(--abyss);border:1px solid var(--line2);color:var(--foam);padding:12px 16px;border-radius:12px;
+  font-size:14px;font-family:inherit;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.btn-filters:hover{border-color:var(--aqua)}
+.btn-filters .badge{background:var(--coral);color:#fff;border-radius:20px;font-size:11px;font-weight:700;padding:1px 7px}
+
+.filters{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.filters.open{max-height:640px}
+.filters-pad{padding:6px 0 16px}
+.fgroup{padding:12px 0;border-top:1px solid var(--line)}
+.fgroup:first-child{border-top:none}
+.fglabel{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:transparent;border:1px solid var(--line2);color:var(--foam);padding:7px 13px;border-radius:30px;
+  font-size:13px;font-family:inherit;cursor:pointer;transition:.16s;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.chip:hover{border-color:var(--muted)}
+.chip .dot{width:9px;height:9px;border-radius:50%;background:var(--c,var(--aqua))}
+.chip[aria-pressed="true"]{background:var(--c,var(--aqua));border-color:transparent;color:#06182b;font-weight:600}
+.chip[aria-pressed="true"] .dot{background:rgba(6,24,43,.55)}
+.filters-foot{display:flex;justify-content:space-between;align-items:center;padding-top:10px;border-top:1px solid var(--line);margin-top:4px}
+/* date range */
+.daterange{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.drfield{display:flex;flex-direction:column;gap:6px}
+.drfield label{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.drfield input[type=date]{background:var(--abyss);border:1px solid var(--line2);color:var(--foam);
+  padding:9px 12px;border-radius:10px;font-family:"Inter",sans-serif;font-size:14px;color-scheme:dark;min-width:150px}
+.drfield input[type=date]:focus{outline:none;border-color:var(--aqua);box-shadow:0 0 0 3px rgba(51,211,196,.16)}
+.drfield input[type=date].set{border-color:var(--aqua);color:var(--aqua)}
+.drarrow{color:var(--muted);font-size:18px;padding-bottom:9px}
+.drclear{background:none;border:none;color:var(--coral);font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer;padding:9px 4px}
+.drclear:hover{text-decoration:underline}
+.fgroup .fglabel.sub{margin-top:18px}
+.clearall{background:none;border:none;color:var(--coral);font-family:"Space Mono",monospace;font-size:12px;letter-spacing:.08em;
+  text-transform:uppercase;cursor:pointer;padding:6px}
+.clearall:hover{text-decoration:underline}
+.countpill{font-family:"Space Mono",monospace;font-size:12px;color:var(--muted)}
+
+/* ---------- RESULTS ---------- */
+.results{max-width:1200px;margin:0 auto;padding:26px 20px 80px}
+.resulthead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;gap:12px;flex-wrap:wrap}
+.resulthead .count{font-family:"Archivo",sans-serif;font-weight:800;font-size:20px}
+.resulthead .count span{color:var(--aqua)}
+.resulthead .sub{color:var(--muted);font-size:13px;font-family:"Space Mono",monospace}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:16px}
+
+.card{position:relative;background:linear-gradient(180deg,var(--abyss2),var(--abyss));border:1px solid var(--line2);
+  border-radius:16px;padding:18px 18px 16px;cursor:pointer;overflow:hidden;transition:transform .18s ease,border-color .18s ease,box-shadow .18s}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c,var(--aqua))}
+.card:hover{transform:translateY(-4px);border-color:var(--c,var(--aqua));box-shadow:var(--shadow)}
+.card:focus-visible{outline:2px solid var(--aqua);outline-offset:2px}
+.card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.ship{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--c,var(--aqua))}
+.nights{font-family:"Archivo",sans-serif;font-weight:800;font-size:13px;color:var(--foam);background:rgba(255,255,255,.06);
+  border:1px solid var(--line2);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.card h3{font-family:"Archivo",sans-serif;font-weight:800;font-size:19px;line-height:1.12;margin:0 0 12px;letter-spacing:-.01em}
+.card .when{display:flex;align-items:baseline;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.card .when .date{font-family:"Archivo",sans-serif;font-weight:800;font-size:15.5px;color:var(--foam);letter-spacing:.005em}
+.card .when .date.end{font-size:12.5px;font-weight:600;color:var(--muted);letter-spacing:0}
+.card .when .arrow{color:var(--muted2);font-size:12px}
+.card .when .dep{color:var(--muted);font-size:12px;font-family:"Space Mono",monospace;letter-spacing:.04em;text-transform:uppercase;margin-left:2px}
+.portline{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pchip{font-size:12px;color:#d6e6f1;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:8px;padding:4px 8px;white-space:nowrap}
+.pchip .fl{margin-right:5px}
+.rtag{position:absolute;top:14px;right:14px}
+.card-foot{margin-top:14px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.region-tag{font-family:"Space Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--c,var(--aqua))}
+.viewlink{font-size:12.5px;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
+.card:hover .viewlink{color:var(--foam)}
+
+.empty{text-align:center;padding:70px 20px;color:var(--muted)}
+.empty h3{font-family:"Archivo",sans-serif;color:var(--foam);font-size:22px;margin:0 0 8px}
+.empty button{margin-top:16px;background:var(--coral);border:none;color:#fff;padding:11px 20px;border-radius:10px;font-family:inherit;font-weight:600;cursor:pointer}
+
+/* ---------- DETAIL ---------- */
+.scrim{position:fixed;inset:0;background:rgba(3,12,22,.72);backdrop-filter:blur(3px);z-index:80;opacity:0;pointer-events:none;transition:opacity .3s}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;top:0;right:0;height:100%;width:min(760px,100%);background:var(--ink);z-index:90;
+  transform:translateX(100%);transition:transform .38s cubic-bezier(.5,.05,.2,1);overflow-y:auto;border-left:1px solid var(--line2)}
+.sheet.show{transform:translateX(0)}
+.sheet-hero{position:relative;padding:24px 30px 26px;overflow:hidden;border-bottom:1px solid var(--line2)}
+.sheet-hero-bg{position:absolute;inset:0;z-index:0}
+.sheet-hero-inner{position:relative;z-index:2}
+.closebtn{position:absolute;top:18px;right:18px;z-index:5;background:rgba(6,24,43,.6);border:1px solid var(--line2);color:var(--foam);
+  width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px;display:grid;place-items:center}
+.closebtn:hover{background:var(--coral);border-color:transparent}
+.sheet .kick{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c,var(--aqua));margin-bottom:12px}
+.sheet h2{font-family:"Archivo",sans-serif;font-weight:900;font-size:clamp(26px,4vw,38px);line-height:1;margin:0 0 18px;letter-spacing:-.015em;max-width:90%}
+.metarow{display:flex;flex-wrap:wrap;gap:22px}
+.meta .k{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.meta .v{font-size:15px;font-weight:600;margin-top:3px}
+.note{margin:18px 30px 0;background:rgba(242,200,121,.09);border:1px solid rgba(242,200,121,.32);border-radius:12px;
+  padding:12px 14px;font-size:13.5px;color:#f6dca2;display:flex;gap:10px}
+.note svg{flex:none;margin-top:1px}
+.route{padding:26px 30px 40px}
+.route-h{font-family:"Space Mono",monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 18px}
+.stop{display:flex;gap:16px;position:relative;padding-bottom:22px}
+.stop:last-child{padding-bottom:0}
+.rail{flex:none;width:34px;display:flex;flex-direction:column;align-items:center}
+.rail .node{width:16px;height:16px;border-radius:50%;background:var(--ink);border:2.5px solid var(--c,var(--aqua));z-index:2}
+.rail .node.dep{background:var(--c,var(--aqua))}
+.rail .thread{flex:1;width:2px;background:linear-gradient(180deg,var(--line2),var(--line2));margin:2px 0;border-radius:2px;
+  background-image:repeating-linear-gradient(180deg,var(--line2) 0 6px,transparent 6px 12px)}
+.stopcard{flex:1;background:var(--abyss);border:1px solid var(--line2);border-radius:14px;overflow:hidden;min-width:0}
+.stopcard.sea{background:transparent;border:1px dashed var(--line2);display:flex;align-items:center;gap:10px;padding:10px 14px;color:var(--muted);font-size:13px}
+.dayhead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px}
+.stopcard:not(.mini):not(.seaday) .dayhead{border-bottom:1px solid var(--line)}
+.dnum{font-family:"Space Mono",monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--c,var(--aqua));font-weight:700}
+.ddate{font-family:"Archivo",sans-serif;font-weight:700;font-size:13.5px;color:var(--foam)}
+.timechip{margin-left:auto;font-family:"Space Mono",monospace;font-size:11px;color:#cadcea;background:rgba(255,255,255,.05);
+  border:1px solid var(--line2);border-radius:20px;padding:3px 11px;white-space:nowrap}
+.stopcard.mini,.stopcard.seaday{display:block}
+.stopcard.seaday{background:transparent;border-style:dashed}
+.mini-body{padding:0 14px 12px;color:var(--muted);font-size:13.5px;display:flex;align-items:center;gap:9px}
+.mini-body .ic{font-size:15px;opacity:.9}
+.rail .node.sea{width:10px;height:10px;border-color:var(--line2);background:var(--ink)}
+.rail .node.port{background:var(--ink)}
+.route-cap{margin:18px 0 0 50px;font-size:12px;color:var(--muted);font-family:"Inter",sans-serif;line-height:1.55;
+  border-top:1px solid var(--line);padding-top:14px}
+.pphoto{position:relative;aspect-ratio:16/9;background:var(--abyss2);overflow:hidden}
+.pphoto-fallback{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:radial-gradient(120% 120% at 30% 20%, var(--c2,#12a99b), var(--c,#0b2942));color:#fff}
+.pphoto-fallback .fflag{font-size:34px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.4))}
+.pphoto-fallback .fname{font-family:"Archivo";font-weight:800;font-size:15px;letter-spacing:.02em;text-transform:uppercase;opacity:.95}
+.pphoto-fallback .fload{font-family:"Space Mono";font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.7}
+.pphoto-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .5s}
+.pphoto-img.loaded{opacity:1}
+.pgrad{position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(6,24,43,.85));z-index:2}
+.plabel{position:absolute;left:14px;bottom:11px;z-index:3;display:flex;align-items:baseline;gap:8px}
+.plabel .pn{font-family:"Archivo";font-weight:800;font-size:18px;letter-spacing:-.01em}
+.plabel .pc{font-size:12px;color:#bcd2e2}
+.pflag{position:absolute;top:11px;left:12px;z-index:3;font-size:22px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.pbody{padding:12px 15px 15px}
+.pbody p{margin:0;font-size:13.5px;color:#c6d8e6;line-height:1.5}
+.deppill{display:inline-block;font-family:"Space Mono",monospace;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  background:var(--c,var(--aqua));color:#06182b;font-weight:700;border-radius:5px;padding:3px 7px;margin-bottom:8px}
+.sheet-foot{padding:0 30px 40px}
+.book{display:flex;gap:12px;flex-wrap:wrap}
+.book .disclaim{font-size:12px;color:var(--muted);font-family:"Space Mono",monospace;line-height:1.6;margin-top:4px}
+
+/* region color map via data attr */
+[data-c="Short Getaway"]{--c:#33d3c4;--c2:#12a99b}
+[data-c="Mexico & Yucatán"]{--c:#f2c879;--c2:#c9993f}
+[data-c="Western Caribbean"]{--c:#7fd88a;--c2:#3f9e57}
+[data-c="Eastern Caribbean"]{--c:#ff5a45;--c2:#c23a2a}
+[data-c="Southern Caribbean"]{--c:#b59bff;--c2:#7a5bd0}
+[data-c="Bermuda"]{--c:#ff8fb0;--c2:#d05a80}
+[data-c="Canada & New England"]{--c:#ff9d5c;--c2:#d06a2a}
+
+@media (max-width:600px){
+  .hero-inner{padding:34px 0 24px}
+  .stats{gap:18px}
+  .sheet-hero{padding:22px 20px}
+  .route{padding:22px 18px 34px}
+  .note{margin:16px 20px 0}
+  .sheet-foot{padding:0 20px 34px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+.wave-move{animation:drift 18s linear infinite}
+@keyframes drift{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-sky"></div>
+  <div class="hero-sun"></div>
+  <svg class="hero-waves" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
+    <g class="wave-move">
+    <path d="M0,60 C180,20 360,100 720,60 C1080,20 1260,100 1440,60 L1440,120 L0,120 Z M1440,60 C1620,20 1800,100 2160,60 C2520,20 2700,100 2880,60 L2880,120 L1440,120 Z" fill="#0a2036" opacity="0.6"/>
+    </g>
+  </svg>
+  <div class="hero-inner">
+    <p class="eyebrow">Ocean Casino Prime · Virgin Voyages 2026–2027</p>
+    <h1 class="title">Your <span class="em">complimentary</span><br><span class="thin">voyages</span></h1>
+    <p class="lede">Every sailing here is a <b>free Sea View cabin</b> for you and a guest as an Ocean Prime cardholder. Browse all of them, filter by where and when you want to sail, and open any voyage to see exactly where it stops — with a photo of each port. <b>Taxes &amp; fees are extra and paid at booking.</b></p>
+    <div class="stats" id="heroStats"></div>
+  </div>
+</header>
+
+<div class="controls">
+  <div class="controls-inner">
+    <div class="searchrow">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="search" type="text" placeholder="Search a port, ship, month or itinerary…" autocomplete="off">
+      </div>
+      <button class="btn-filters" id="toggleFilters" aria-expanded="false">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+        Filters <span class="badge" id="filterBadge" style="display:none">0</span>
+      </button>
+      <div class="sortwrap">
+        <select class="sort" id="sort" aria-label="Sort voyages">
+          <option value="date-asc">Soonest first</option>
+          <option value="date-desc">Latest first</option>
+          <option value="nights-asc">Shortest first</option>
+          <option value="nights-desc">Longest first</option>
+          <option value="region">By region</option>
+          <option value="ship">By ship</option>
+        </select>
+      </div>
+    </div>
+    <div class="filters" id="filters">
+      <div class="filters-pad">
+        <div class="fgroup"><div class="fglabel">Region</div><div class="chips" id="fRegion"></div></div>
+        <div class="fgroup"><div class="fglabel">Sail from</div><div class="chips" id="fEmbark"></div></div>
+        <div class="fgroup"><div class="fglabel">Length</div><div class="chips" id="fNights"></div></div>
+        <div class="fgroup">
+          <div class="fglabel">When · date range</div>
+          <div class="daterange">
+            <span class="drfield"><label for="dateFrom">Earliest departure</label><input type="date" id="dateFrom"></span>
+            <span class="drarrow">→</span>
+            <span class="drfield"><label for="dateTo">Latest departure</label><input type="date" id="dateTo"></span>
+            <button class="drclear" id="dateClear" hidden>Clear dates</button>
+          </div>
+          <div class="fglabel sub">When · by month</div>
+          <div class="chips" id="fMonth"></div>
+        </div>
+        <div class="fgroup"><div class="fglabel">Ship</div><div class="chips" id="fShip"></div></div>
+        <div class="filters-foot">
+          <span class="countpill" id="filterCount"></span>
+          <button class="clearall" id="clearAll">Clear all filters</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="results">
+  <div class="resulthead">
+    <div class="count" id="resultCount"></div>
+    <div class="sub" id="resultSub"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">
+    <h3>No voyages match those filters</h3>
+    <p>Try widening your search or clearing a filter or two.</p>
+    <button id="emptyClear">Clear all filters</button>
+  </div>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" aria-hidden="true" aria-label="Voyage detail"></aside>
+
+<script>
+const DATA = {
+ "ports": {
+  "miami": {
+   "name": "Miami, Florida",
+   "country": "USA",
+   "flag": "🇺🇸",
+   "wiki": "Miami",
+   "blurb": "Home port and a destination in itself — Art Deco South Beach, Wynwood murals, Little Havana cafecito, and Terminal V."
+  },
+  "bimini": {
+   "name": "The Beach Club at Bimini",
+   "country": "Bahamas",
+   "flag": "🇧🇸",
+   "wiki": "Bimini",
+   "blurb": "Virgin's private beach club: a lagoon pool, six bars, white sand, and a signature sunset bonfire bash."
+  },
+  "key_west": {
+   "name": "Key West, Florida",
+   "country": "USA",
+   "flag": "🇺🇸",
+   "wiki": "Key West",
+   "blurb": "Pastel conch houses, Duval Street bars, Hemingway's six-toed cats and the Southernmost Point buoy."
+  },
+  "grand_turk": {
+   "name": "Grand Turk",
+   "country": "Turks & Caicos",
+   "flag": "🇹🇨",
+   "wiki": "Grand Turk Island",
+   "blurb": "Governor's Beach's soft sand, a 19th-century lighthouse, and reefs teeming with life just offshore."
+  },
+  "nassau": {
+   "name": "Nassau",
+   "country": "Bahamas",
+   "flag": "🇧🇸",
+   "wiki": "Nassau, Bahamas",
+   "blurb": "Colonial forts, the pastel Bay Street strip, and pirate history along a gorgeous harbor."
+  },
+  "puerto_plata": {
+   "name": "Puerto Plata",
+   "country": "Dominican Republic",
+   "flag": "🇩🇴",
+   "wiki": "Puerto Plata, Dominican Republic",
+   "blurb": "A cable car to Mount Isabel, Victorian gingerbread architecture, and amber-rich hills."
+  },
+  "samana": {
+   "name": "Samaná",
+   "country": "Dominican Republic",
+   "flag": "🇩🇴",
+   "wiki": "Santa Bárbara de Samaná",
+   "blurb": "Rainforest waterfalls, secluded beaches, and (in season) humpback whales in the bay."
+  },
+  "cozumel": {
+   "name": "Cozumel",
+   "country": "Mexico",
+   "flag": "🇲🇽",
+   "wiki": "Cozumel",
+   "blurb": "World-class reef diving on the Mesoamerican Barrier Reef and ferry access to Playa del Carmen."
+  },
+  "costa_maya": {
+   "name": "Costa Maya",
+   "country": "Mexico",
+   "flag": "🇲🇽",
+   "wiki": "Costa Maya",
+   "blurb": "Gateway to Mayan ruins at Chacchoben, plus a laid-back beach village and cenotes."
+  },
+  "grand_cayman": {
+   "name": "George Town, Grand Cayman",
+   "country": "Cayman Islands",
+   "flag": "🇰🇾",
+   "wiki": "George Town, Cayman Islands",
+   "blurb": "Seven Mile Beach, Stingray City sandbar, and crystalline snorkeling coves."
+  },
+  "bermuda": {
+   "name": "King's Wharf, Bermuda",
+   "country": "Bermuda",
+   "flag": "🇧🇲",
+   "wiki": "Royal Naval Dockyard, Bermuda",
+   "blurb": "Pink-sand beaches, the historic Royal Naval Dockyard, and glowing turquoise coves."
+  },
+  "san_juan": {
+   "name": "San Juan",
+   "country": "Puerto Rico",
+   "flag": "🇵🇷",
+   "wiki": "San Juan, Puerto Rico",
+   "blurb": "Old San Juan's blue cobblestones, the El Morro fortress, and lively plazas — steps from the pier."
+  },
+  "aruba": {
+   "name": "Oranjestad, Aruba",
+   "country": "Aruba",
+   "flag": "🇦🇼",
+   "wiki": "Oranjestad, Aruba",
+   "blurb": "\"One Happy Island\" — candy-colored Dutch facades, Eagle Beach, and calm diving waters."
+  },
+  "curacao": {
+   "name": "Willemstad, Curaçao",
+   "country": "Curaçao",
+   "flag": "🇨🇼",
+   "wiki": "Willemstad",
+   "blurb": "A UNESCO waterfront of pastel Dutch gables and the floating Queen Emma pontoon bridge."
+  },
+  "martinique": {
+   "name": "Fort-de-France, Martinique",
+   "country": "Martinique",
+   "flag": "🇫🇷",
+   "wiki": "Fort-de-France",
+   "blurb": "A slice of France in the Caribbean: volcanic peaks, rum distilleries, and Creole markets."
+  },
+  "st_kitts": {
+   "name": "Basseterre, St. Kitts",
+   "country": "St. Kitts & Nevis",
+   "flag": "🇰🇳",
+   "wiki": "Basseterre",
+   "blurb": "The UNESCO Brimstone Hill fortress and a scenic railway winding past old sugar plantations."
+  },
+  "roatan": {
+   "name": "Roatán",
+   "country": "Honduras",
+   "flag": "🇭🇳",
+   "wiki": "Roatán",
+   "blurb": "A Bay Island fringed by the Mesoamerican Reef — superb diving and jungle zip-lines."
+  },
+  "ocho_rios": {
+   "name": "Ocho Rios",
+   "country": "Jamaica",
+   "flag": "🇯🇲",
+   "wiki": "Ocho Rios",
+   "blurb": "Climb Dunn's River Falls, feel the reggae pulse, and sip Blue Mountain coffee."
+  },
+  "nyc": {
+   "name": "New York City",
+   "country": "USA",
+   "flag": "🇺🇸",
+   "wiki": "New York City",
+   "blurb": "Sail out past the Statue of Liberty from the ultimate melting pot of food, art and theater."
+  },
+  "boston": {
+   "name": "Boston, Massachusetts",
+   "country": "USA",
+   "flag": "🇺🇸",
+   "wiki": "Boston",
+   "blurb": "The Freedom Trail, North End cannoli, Faneuil Hall, and a proper lobster roll."
+  },
+  "portland": {
+   "name": "Portland, Maine",
+   "country": "USA",
+   "flag": "🇺🇸",
+   "wiki": "Portland, Maine",
+   "blurb": "Iconic lighthouses, a working waterfront, and some of New England's freshest seafood."
+  },
+  "saint_john": {
+   "name": "Saint John, New Brunswick",
+   "country": "Canada",
+   "flag": "🇨🇦",
+   "wiki": "Saint John, New Brunswick",
+   "blurb": "The Bay of Fundy's record tides, the Reversing Falls, and Irving Nature Park's fall color."
+  },
+  "halifax": {
+   "name": "Halifax, Nova Scotia",
+   "country": "Canada",
+   "flag": "🇨🇦",
+   "wiki": "Halifax, Nova Scotia",
+   "blurb": "Citadel Hill, a buzzing waterfront boardwalk, and staggeringly fresh Atlantic seafood."
+  }
+ },
+ "cruises": [
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 7,
+   "day": 11,
+   "date": "2026-07-11",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 7,
+   "day": 16,
+   "date": "2026-07-16",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 7,
+   "day": 20,
+   "date": "2026-07-20",
+   "nights": 5,
+   "itinerary": "Riviera Maya",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 7,
+   "day": 25,
+   "date": "2026-07-25",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 7,
+   "day": 30,
+   "date": "2026-07-30",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 3,
+   "date": "2026-08-03",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 8,
+   "date": "2026-08-08",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 13,
+   "date": "2026-08-13",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 17,
+   "date": "2026-08-17",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 22,
+   "date": "2026-08-22",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 27,
+   "date": "2026-08-27",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 8,
+   "day": 31,
+   "date": "2026-08-31",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 5,
+   "date": "2026-09-05",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 10,
+   "date": "2026-09-10",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 14,
+   "date": "2026-09-14",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 19,
+   "date": "2026-09-19",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 9,
+   "day": 19,
+   "date": "2026-09-19",
+   "nights": 8,
+   "itinerary": "Fall Foliage in Canada & New England",
+   "region": "Canada & New England",
+   "embark": "nyc",
+   "ports": [
+    "boston",
+    "portland",
+    "saint_john",
+    "halifax"
+   ],
+   "note": "Autumn foliage sailing round-trip from New York."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 24,
+   "date": "2026-09-24",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 9,
+   "day": 27,
+   "date": "2026-09-27",
+   "nights": 5,
+   "itinerary": "The Big Apple to Bermuda",
+   "region": "Bermuda",
+   "embark": "nyc",
+   "ports": [
+    "bermuda"
+   ],
+   "note": "Round-trip from New York."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 9,
+   "day": 28,
+   "date": "2026-09-28",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 10,
+   "day": 2,
+   "date": "2026-10-02",
+   "nights": 5,
+   "itinerary": "The Big Apple to Bermuda",
+   "region": "Bermuda",
+   "embark": "nyc",
+   "ports": [
+    "bermuda"
+   ],
+   "note": "Round-trip from New York."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 3,
+   "date": "2026-10-03",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 10,
+   "day": 7,
+   "date": "2026-10-07",
+   "nights": 6,
+   "itinerary": "New York to Bermuda (& Back)",
+   "region": "Bermuda",
+   "embark": "nyc",
+   "ports": [
+    "bermuda"
+   ],
+   "note": "Round-trip from New York with an extended stay in Bermuda."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 8,
+   "date": "2026-10-08",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 12,
+   "date": "2026-10-12",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 10,
+   "day": 13,
+   "date": "2026-10-13",
+   "nights": 6,
+   "itinerary": "New York to Bermuda (& Back)",
+   "region": "Bermuda",
+   "embark": "nyc",
+   "ports": [
+    "bermuda"
+   ],
+   "note": "Round-trip from New York with an extended stay in Bermuda."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 17,
+   "date": "2026-10-17",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 22,
+   "date": "2026-10-22",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 10,
+   "day": 26,
+   "date": "2026-10-26",
+   "nights": 6,
+   "itinerary": "Mexico & Bimini: Halloween Edition",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": "Themed Halloween sailing."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 10,
+   "day": 31,
+   "date": "2026-10-31",
+   "nights": 5,
+   "itinerary": "Scarlet's Haunted Halloween Soirée",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": "Themed Halloween sailing — exact ports may vary."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 10,
+   "day": 31,
+   "date": "2026-10-31",
+   "nights": 7,
+   "itinerary": "Valiant's Haunted Halloween Soirée",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "Themed Halloween sailing from San Juan; ports may vary."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 11,
+   "day": 1,
+   "date": "2026-11-01",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 5,
+   "date": "2026-11-05",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 11,
+   "day": 7,
+   "date": "2026-11-07",
+   "nights": 7,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 11,
+   "day": 8,
+   "date": "2026-11-08",
+   "nights": 8,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 9,
+   "date": "2026-11-09",
+   "nights": 5,
+   "itinerary": "Cayman Isles & Bimini Beach Miles",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 14,
+   "date": "2026-11-14",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 11,
+   "day": 14,
+   "date": "2026-11-14",
+   "nights": 6,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 11,
+   "day": 16,
+   "date": "2026-11-16",
+   "nights": 6,
+   "itinerary": "Captivating Costa Maya & Cozumel Charm",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 19,
+   "date": "2026-11-19",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 11,
+   "day": 20,
+   "date": "2026-11-20",
+   "nights": 8,
+   "itinerary": "Thanksgiving: St. Isles, Aruba & Curaçao",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "st_kitts",
+    "aruba",
+    "curacao",
+    "martinique"
+   ],
+   "note": "Thanksgiving sailing from San Juan."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 23,
+   "date": "2026-11-23",
+   "nights": 5,
+   "itinerary": "Jamaican Waves & Bimini Breeze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "ocho_rios",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2026,
+   "month": 11,
+   "day": 25,
+   "date": "2026-11-25",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 11,
+   "day": 28,
+   "date": "2026-11-28",
+   "nights": 5,
+   "itinerary": "Mayan Sol",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 11,
+   "day": 28,
+   "date": "2026-11-28",
+   "nights": 7,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 12,
+   "day": 3,
+   "date": "2026-12-03",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 12,
+   "day": 5,
+   "date": "2026-12-05",
+   "nights": 8,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 12,
+   "day": 5,
+   "date": "2026-12-05",
+   "nights": 7,
+   "itinerary": "Southern Caribbean & Aruban Nights",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan, with a very late stay in Aruba."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 12,
+   "day": 7,
+   "date": "2026-12-07",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2026,
+   "month": 12,
+   "day": 10,
+   "date": "2026-12-10",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 12,
+   "day": 12,
+   "date": "2026-12-12",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 12,
+   "day": 12,
+   "date": "2026-12-12",
+   "nights": 7,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2026,
+   "month": 12,
+   "day": 17,
+   "date": "2026-12-17",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2026,
+   "month": 12,
+   "day": 19,
+   "date": "2026-12-19",
+   "nights": 8,
+   "itinerary": "Eastern Caribbean & Bimini Holiday",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": "Holiday-season sailing."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2026,
+   "month": 12,
+   "day": 19,
+   "date": "2026-12-19",
+   "nights": 7,
+   "itinerary": "Valiant Caribbean Holidays",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "Holiday sailing from San Juan; ports may vary."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 1,
+   "day": 2,
+   "date": "2027-01-02",
+   "nights": 7,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 1,
+   "day": 3,
+   "date": "2027-01-03",
+   "nights": 7,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 4,
+   "date": "2027-01-04",
+   "nights": 5,
+   "itinerary": "Mayan Sol",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 1,
+   "day": 7,
+   "date": "2027-01-07",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 9,
+   "date": "2027-01-09",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 1,
+   "day": 9,
+   "date": "2027-01-09",
+   "nights": 7,
+   "itinerary": "Southern Caribbean & Aruban Nights",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan, with a very late stay in Aruba."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 1,
+   "day": 10,
+   "date": "2027-01-10",
+   "nights": 6,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 14,
+   "date": "2027-01-14",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 1,
+   "day": 16,
+   "date": "2027-01-16",
+   "nights": 8,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 1,
+   "day": 16,
+   "date": "2027-01-16",
+   "nights": 7,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 18,
+   "date": "2027-01-18",
+   "nights": 5,
+   "itinerary": "Dominican Daze",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 1,
+   "day": 21,
+   "date": "2027-01-21",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 23,
+   "date": "2027-01-23",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 1,
+   "day": 23,
+   "date": "2027-01-23",
+   "nights": 6,
+   "itinerary": "Southern Caribbean Cruise",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan. Southern-Caribbean ports have recently been subject to change."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 1,
+   "day": 24,
+   "date": "2027-01-24",
+   "nights": 6,
+   "itinerary": "Eastern Caribbean Cruise",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 1,
+   "day": 28,
+   "date": "2027-01-28",
+   "nights": 4,
+   "itinerary": "Fire and Sunset Soirées",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": "Late night in Bimini with the signature beach bonfire."
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 1,
+   "day": 29,
+   "date": "2027-01-29",
+   "nights": 8,
+   "itinerary": "Southern Caribbean & Aruban Nights",
+   "region": "Southern Caribbean",
+   "embark": "san_juan",
+   "ports": [
+    "aruba",
+    "curacao",
+    "martinique",
+    "st_kitts"
+   ],
+   "note": "From San Juan, with a very late stay in Aruba."
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 1,
+   "day": 30,
+   "date": "2027-01-30",
+   "nights": 8,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 2,
+   "day": 1,
+   "date": "2027-02-01",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 2,
+   "day": 6,
+   "date": "2027-02-06",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 2,
+   "day": 7,
+   "date": "2027-02-07",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 2,
+   "day": 11,
+   "date": "2027-02-11",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 2,
+   "day": 18,
+   "date": "2027-02-18",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 2,
+   "day": 20,
+   "date": "2027-02-20",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 2,
+   "day": 21,
+   "date": "2027-02-21",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 2,
+   "day": 25,
+   "date": "2027-02-25",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 2,
+   "day": 28,
+   "date": "2027-02-28",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 1,
+   "date": "2027-03-01",
+   "nights": 5,
+   "itinerary": "Dominican Republic & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 3,
+   "day": 4,
+   "date": "2027-03-04",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 6,
+   "date": "2027-03-06",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 3,
+   "day": 7,
+   "date": "2027-03-07",
+   "nights": 6,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 11,
+   "date": "2027-03-11",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 3,
+   "day": 13,
+   "date": "2027-03-13",
+   "nights": 8,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 15,
+   "date": "2027-03-15",
+   "nights": 5,
+   "itinerary": "Dominican Republic & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 3,
+   "day": 18,
+   "date": "2027-03-18",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 20,
+   "date": "2027-03-20",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 3,
+   "day": 21,
+   "date": "2027-03-21",
+   "nights": 6,
+   "itinerary": "Eastern Caribbean Cruise",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Brilliant Lady",
+   "shipShort": "Brilliant",
+   "year": 2027,
+   "month": 3,
+   "day": 22,
+   "date": "2027-03-22",
+   "nights": 4,
+   "itinerary": "Bahamas & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 25,
+   "date": "2027-03-25",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 3,
+   "day": 27,
+   "date": "2027-03-27",
+   "nights": 8,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 3,
+   "day": 29,
+   "date": "2027-03-29",
+   "nights": 5,
+   "itinerary": "Grand Cayman & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 4,
+   "day": 3,
+   "date": "2027-04-03",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 4,
+   "day": 4,
+   "date": "2027-04-04",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 4,
+   "day": 8,
+   "date": "2027-04-08",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 4,
+   "day": 11,
+   "date": "2027-04-11",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 4,
+   "day": 12,
+   "date": "2027-04-12",
+   "nights": 5,
+   "itinerary": "Dominican Republic & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 4,
+   "day": 15,
+   "date": "2027-04-15",
+   "nights": 7,
+   "itinerary": "Western Caribbean & Bimini Beach Club",
+   "region": "Western Caribbean",
+   "embark": "miami",
+   "ports": [
+    "roatan",
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Scarlet Lady",
+   "shipShort": "Scarlet",
+   "year": 2027,
+   "month": 4,
+   "day": 17,
+   "date": "2027-04-17",
+   "nights": 7,
+   "itinerary": "Eastern Caribbean & Bimini Beach Club",
+   "region": "Eastern Caribbean",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "puerto_plata",
+    "samana",
+    "nassau",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 4,
+   "day": 18,
+   "date": "2027-04-18",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 4,
+   "day": 22,
+   "date": "2027-04-22",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 4,
+   "day": 23,
+   "date": "2027-04-23",
+   "nights": 5,
+   "itinerary": "Grand Cayman & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 4,
+   "day": 26,
+   "date": "2027-04-26",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Resilient Lady",
+   "shipShort": "Resilient",
+   "year": 2027,
+   "month": 4,
+   "day": 28,
+   "date": "2027-04-28",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 1,
+   "date": "2027-05-01",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 6,
+   "date": "2027-05-06",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 10,
+   "date": "2027-05-10",
+   "nights": 5,
+   "itinerary": "Grand Cayman & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 15,
+   "date": "2027-05-15",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 20,
+   "date": "2027-05-20",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 24,
+   "date": "2027-05-24",
+   "nights": 5,
+   "itinerary": "Grand Cayman & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 5,
+   "day": 29,
+   "date": "2027-05-29",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 3,
+   "date": "2027-06-03",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 7,
+   "date": "2027-06-07",
+   "nights": 5,
+   "itinerary": "Grand Cayman & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_cayman",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 12,
+   "date": "2027-06-12",
+   "nights": 5,
+   "itinerary": "Grand Turk & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "grand_turk",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 17,
+   "date": "2027-06-17",
+   "nights": 4,
+   "itinerary": "Key West & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "key_west",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 21,
+   "date": "2027-06-21",
+   "nights": 5,
+   "itinerary": "Mexico & Bimini Beach Club",
+   "region": "Mexico & Yucatán",
+   "embark": "miami",
+   "ports": [
+    "costa_maya",
+    "cozumel",
+    "bimini"
+   ],
+   "note": ""
+  },
+  {
+   "ship": "Valiant Lady",
+   "shipShort": "Valiant",
+   "year": 2027,
+   "month": 6,
+   "day": 26,
+   "date": "2027-06-26",
+   "nights": 5,
+   "itinerary": "Dominican Republic & Bimini Beach Club",
+   "region": "Short Getaway",
+   "embark": "miami",
+   "ports": [
+    "puerto_plata",
+    "bimini"
+   ],
+   "note": ""
+  }
+ ]
+};
+const PORTS = DATA.ports, CRUISES = DATA.cruises;
+const EMBARK = {miami:"Miami",san_juan:"San Juan",nyc:"New York"};
+const EMBARK_FULL = {miami:"Miami, Florida",san_juan:"San Juan, Puerto Rico",nyc:"New York City"};
+const MONTHS=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const MONTHS_FULL=["","January","February","March","April","May","June","July","August","September","October","November","December"];
+const REGIONS=["Short Getaway","Mexico & Yucatán","Western Caribbean","Eastern Caribbean","Southern Caribbean","Bermuda","Canada & New England"];
+
+function seasonOf(c){
+  const y=c.year,m=c.month;
+  if(y===2026&&m>=7&&m<=8) return "Summer 2026";
+  if(y===2026&&m>=9&&m<=11) return "Fall 2026";
+  if((y===2026&&m===12)||(y===2027&&m<=2)) return "Winter 2026–27";
+  if(y===2027&&m>=3&&m<=5) return "Spring 2027";
+  if(y===2027&&m===6) return "Summer 2027";
+  return y+"";
+}
+const SEASON_ORDER=["Summer 2026","Fall 2026","Winter 2026–27","Spring 2027","Summer 2027"];
+CRUISES.forEach(c=>{c.season=seasonOf(c);
+  c._search=(c.itinerary+" "+c.ship+" "+c.region+" "+EMBARK_FULL[c.embark]+" "+c.season+" "+MONTHS_FULL[c.month]+" "+c.ports.map(p=>PORTS[p].name+" "+PORTS[p].country).join(" ")).toLowerCase();
+});
+
+// hero stats
+document.getElementById('heroStats').innerHTML=[
+  [CRUISES.length,"Free sailings"],[4,"Lady Ships"],[Object.keys(PORTS).length,"Ports of call"],["4–8","Nights at sea"]
+].map(s=>`<div class="stat"><div class="n">${s[0]}</div><div class="l">${s[1]}</div></div>`).join('');
+
+// filter state
+const state={search:"",sort:"date-asc",region:new Set(),embark:new Set(),nights:new Set(),season:new Set(),months:new Set(),dateFrom:"",dateTo:"",ship:new Set()};
+
+function fmtDate(c){return `${MONTHS[c.month]} ${c.day}, ${c.year}`;}
+function returnDate(c){
+  const d=new Date(Date.UTC(c.year,c.month-1,c.day)); d.setUTCDate(d.getUTCDate()+c.nights);
+  return `${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+function returnDateShort(c){
+  const d=new Date(Date.UTC(c.year,c.month-1,c.day)); d.setUTCDate(d.getUTCDate()+c.nights);
+  const y=d.getUTCFullYear();
+  return `${MONTHS[d.getUTCMonth()+1]} ${d.getUTCDate()}`+(y!==c.year?`, ${y}`:'');
+}
+
+// build filter chips
+function chip(container,label,value,set,colorAttr){
+  const b=document.createElement('button');
+  b.className='chip';b.setAttribute('aria-pressed','false');
+  if(colorAttr){b.setAttribute('data-c',value);b.innerHTML=`<span class="dot"></span>${label}`;}
+  else b.textContent=label;
+  b.onclick=()=>{ if(set.has(value)){set.delete(value);b.setAttribute('aria-pressed','false');}
+    else{set.add(value);b.setAttribute('aria-pressed','true');} render(); };
+  container.appendChild(b);
+}
+REGIONS.forEach(r=>chip(document.getElementById('fRegion'),r,r,state.region,true));
+["miami","san_juan","nyc"].forEach(e=>chip(document.getElementById('fEmbark'),EMBARK_FULL[e],e,state.embark));
+[4,5,6,7,8].forEach(n=>chip(document.getElementById('fNights'),n+" nights",n,state.nights));
+// Month chips (built from the actual sailing dates in the data)
+const monthKeys=[...new Set(CRUISES.map(c=>c.year+'-'+String(c.month).padStart(2,'0')))].sort();
+monthKeys.forEach(mk=>{
+  const [y,m]=mk.split('-');
+  chip(document.getElementById('fMonth'), MONTHS[+m]+" '"+y.slice(2), mk, state.months);
+});
+// Date range inputs
+const dateFromEl=document.getElementById('dateFrom'), dateToEl=document.getElementById('dateTo'),
+      dateClearEl=document.getElementById('dateClear');
+const allDates=CRUISES.map(c=>c.date).sort();
+const minDate=allDates[0], maxDate=allDates[allDates.length-1];
+[dateFromEl,dateToEl].forEach(el=>{el.min=minDate;el.max=maxDate;});
+function syncDateUI(){
+  dateFromEl.classList.toggle('set',!!state.dateFrom);
+  dateToEl.classList.toggle('set',!!state.dateTo);
+  dateClearEl.hidden=!(state.dateFrom||state.dateTo);
+}
+dateFromEl.addEventListener('change',e=>{state.dateFrom=e.target.value;syncDateUI();render();});
+dateToEl.addEventListener('change',e=>{state.dateTo=e.target.value;syncDateUI();render();});
+dateClearEl.addEventListener('click',()=>{state.dateFrom="";state.dateTo="";dateFromEl.value="";dateToEl.value="";syncDateUI();render();});
+SEASON_ORDER;
+["Resilient","Valiant","Scarlet","Brilliant"].forEach(s=>chip(document.getElementById('fShip'),s+" Lady",s,state.ship));
+
+// controls
+const searchEl=document.getElementById('search');
+searchEl.addEventListener('input',e=>{state.search=e.target.value.trim().toLowerCase();render();});
+document.getElementById('sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
+const filtersEl=document.getElementById('filters'),toggleEl=document.getElementById('toggleFilters');
+toggleEl.onclick=()=>{const open=filtersEl.classList.toggle('open');toggleEl.setAttribute('aria-expanded',open);};
+function clearAll(){state.region.clear();state.embark.clear();state.nights.clear();state.season.clear();state.months.clear();state.ship.clear();
+  state.dateFrom="";state.dateTo="";
+  if(typeof dateFromEl!=='undefined'){dateFromEl.value="";dateToEl.value="";syncDateUI();}
+  document.querySelectorAll('.chip[aria-pressed="true"]').forEach(c=>c.setAttribute('aria-pressed','false'));render();}
+document.getElementById('clearAll').onclick=clearAll;
+document.getElementById('emptyClear').onclick=clearAll;
+
+function activeCount(){return state.region.size+state.embark.size+state.nights.size+state.season.size+state.months.size+state.ship.size+((state.dateFrom||state.dateTo)?1:0);}
+
+function filtered(){
+  let list=CRUISES.filter(c=>{
+    if(state.search && !c._search.includes(state.search)) return false;
+    if(state.region.size && !state.region.has(c.region)) return false;
+    if(state.embark.size && !state.embark.has(c.embark)) return false;
+    if(state.nights.size && !state.nights.has(c.nights)) return false;
+    if(state.season.size && !state.season.has(c.season)) return false;
+    if(state.months.size && !state.months.has(c.year+'-'+String(c.month).padStart(2,'0'))) return false;
+    if(state.dateFrom && c.date < state.dateFrom) return false;
+    if(state.dateTo && c.date > state.dateTo) return false;
+    if(state.ship.size && !state.ship.has(c.shipShort)) return false;
+    return true;
+  });
+  const s=state.sort;
+  list.sort((a,b)=>{
+    if(s==="date-asc")return a.date.localeCompare(b.date);
+    if(s==="date-desc")return b.date.localeCompare(a.date);
+    if(s==="nights-asc")return a.nights-b.nights||a.date.localeCompare(b.date);
+    if(s==="nights-desc")return b.nights-a.nights||a.date.localeCompare(b.date);
+    if(s==="region")return REGIONS.indexOf(a.region)-REGIONS.indexOf(b.region)||a.date.localeCompare(b.date);
+    if(s==="ship")return a.ship.localeCompare(b.ship)||a.date.localeCompare(b.date);
+    return 0;
+  });
+  return list;
+}
+
+function cardHTML(c,i){
+  const chips=c.ports.map(p=>`<span class="pchip"><span class="fl">${PORTS[p].flag}</span>${PORTS[p].name.split(',')[0]}</span>`).join('');
+  return `<article class="card" data-c="${c.region}" data-i="${i}" tabindex="0" role="button" aria-label="${c.itinerary}, ${c.nights} nights on ${c.ship}">
+    <div class="card-top">
+      <span class="ship">${c.ship}</span>
+      <span class="nights">${c.nights} NT</span>
+    </div>
+    <h3>${c.itinerary}</h3>
+    <div class="when">
+      <span class="date">${fmtDate(c)}</span>
+      <span class="arrow">→</span>
+      <span class="date end">${returnDateShort(c)}</span>
+      <span class="dep">from ${EMBARK[c.embark]}</span>
+    </div>
+    <div class="portline">${chips}</div>
+    <div class="card-foot">
+      <span class="region-tag">${c.region}</span>
+      <span class="viewlink">See ports & photos
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </div>
+  </article>`;
+}
+
+let CURRENT=[];
+function render(){
+  const list=filtered();CURRENT=list;
+  const grid=document.getElementById('grid'),empty=document.getElementById('empty');
+  document.getElementById('resultCount').innerHTML=`<span>${list.length}</span> ${list.length===1?'voyage':'voyages'}`;
+  const bits=[];
+  if(state.search)bits.push(`“${state.search}”`);
+  if(activeCount())bits.push(`${activeCount()} filter${activeCount()>1?'s':''}`);
+  document.getElementById('resultSub').textContent=bits.length?('· '+bits.join(' · ')):'· all complimentary sailings';
+  const badge=document.getElementById('filterBadge');
+  if(activeCount()){badge.style.display='';badge.textContent=activeCount();}else badge.style.display='none';
+  document.getElementById('filterCount').textContent=list.length+" match"+(list.length===1?'':'es');
+  if(!list.length){grid.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  grid.innerHTML=list.map((c,i)=>cardHTML(c,i)).join('');
+  grid.querySelectorAll('.card').forEach(el=>{
+    el.addEventListener('click',()=>openSheet(CURRENT[+el.dataset.i]));
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openSheet(CURRENT[+el.dataset.i]);}});
+  });
+}
+
+/* -------- port photos via Wikipedia REST (with graceful fallback) -------- */
+const photoCache={};
+function loadPhoto(imgEl,wikiTitle){
+  if(photoCache[wikiTitle]===false)return;
+  if(photoCache[wikiTitle]){apply(imgEl,photoCache[wikiTitle]);return;}
+  const url="https://en.wikipedia.org/api/rest_v1/page/summary/"+encodeURIComponent(wikiTitle.replace(/ /g,'_'));
+  fetch(url,{headers:{'Accept':'application/json'}}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{
+    const src=(j.originalimage&&j.originalimage.source)||(j.thumbnail&&j.thumbnail.source);
+    if(src){photoCache[wikiTitle]=src;apply(imgEl,src);}else{photoCache[wikiTitle]=false;}
+  }).catch(()=>{photoCache[wikiTitle]=false;});
+}
+function apply(imgEl,src){
+  if(!imgEl.isConnected)return;
+  imgEl.onload=()=>imgEl.classList.add('loaded');
+  imgEl.onerror=()=>{};
+  imgEl.src=src;
+}
+
+// Typical port hours (arrival–departure) and embark/disembark times.
+// Virgin's exact sequence and times vary by sailing — shown as a typical schedule.
+const PORT_HOURS={
+  bimini:["9:00 AM","7:00 PM"], key_west:["8:00 AM","5:00 PM"], grand_turk:["8:00 AM","5:00 PM"],
+  nassau:["8:00 AM","6:00 PM"], puerto_plata:["8:00 AM","6:00 PM"], samana:["8:00 AM","5:00 PM"],
+  cozumel:["9:00 AM","7:00 PM"], costa_maya:["8:00 AM","5:00 PM"], grand_cayman:["8:00 AM","5:00 PM"],
+  bermuda:["8:00 AM","late stay"], aruba:["9:00 AM","11:00 PM"], curacao:["8:00 AM","6:00 PM"],
+  martinique:["8:00 AM","5:00 PM"], st_kitts:["8:00 AM","4:00 PM"], roatan:["8:00 AM","5:00 PM"],
+  ocho_rios:["8:00 AM","5:00 PM"], boston:["8:00 AM","8:00 PM"], portland:["8:00 AM","5:00 PM"],
+  saint_john:["9:30 AM","8:00 PM"], halifax:["8:00 AM","5:00 PM"]
+};
+const EMBARK_TIMES={miami:["5:00 PM","6:30 AM"], san_juan:["8:00 PM","6:30 AM"], nyc:["5:00 PM","7:00 AM"]};
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function fmtDayDate(dt){return WD[dt.getUTCDay()]+" · "+MONTHS[dt.getUTCMonth()+1]+" "+dt.getUTCDate();}
+
+// Build a typical day-by-day schedule (embark → middle days → disembark).
+function buildSchedule(c){
+  const ports=c.ports.slice();
+  const seaCount=Math.max(0,(c.nights-1)-ports.length);
+  const bunchAtEnds=(c.region==='Canada & New England'||c.region==='Bermuda');
+  let seaLeft=seaCount;
+  const lead=seaLeft>0?1:0; seaLeft-=lead;           // a sea day right after leaving port
+  let trailing=0, between=seaLeft;
+  if(bunchAtEnds){ trailing=seaLeft; between=0; }     // repositioning-style: sea days near the end
+  const middle=[];
+  for(let i=0;i<lead;i++) middle.push({type:'sea'});
+  const gaps=Math.max(0,ports.length-1);
+  const betweenArr=new Array(gaps).fill(0);
+  let b=between, gi=0;
+  while(b>0 && gaps>0){ betweenArr[gi%gaps]++; b--; gi++; }
+  trailing+=b;
+  ports.forEach((k,i)=>{ middle.push({type:'port',key:k});
+    if(i<gaps) for(let s=0;s<betweenArr[i];s++) middle.push({type:'sea'}); });
+  for(let i=0;i<trailing;i++) middle.push({type:'sea'});
+  const days=[{type:'embark'}, ...middle, {type:'disembark'}];
+  const start=new Date(Date.UTC(c.year,c.month-1,c.day));
+  days.forEach((d,i)=>{ const dt=new Date(start); dt.setUTCDate(start.getUTCDate()+i); d.date=dt; d.n=i+1; });
+  return days;
+}
+
+function dayHTML(day,c,isLast){
+  const dnum=`<span class="dnum">Day ${day.n}</span><span class="ddate">${fmtDayDate(day.date)}</span>`;
+  const thread=isLast?'':'<span class="thread"></span>';
+  if(day.type==='embark'){
+    const t=EMBARK_TIMES[c.embark][0];
+    return `<div class="stop"><div class="rail"><span class="node dep"></span>${thread}</div>
+      <div class="stopcard mini"><div class="dayhead">${dnum}<span class="timechip">Depart ${t}</span></div>
+      <div class="mini-body"><span class="ic">⚓</span>Set sail from ${EMBARK_FULL[c.embark]}</div></div></div>`;
+  }
+  if(day.type==='disembark'){
+    const t=EMBARK_TIMES[c.embark][1];
+    return `<div class="stop"><div class="rail"><span class="node dep"></span>${thread}</div>
+      <div class="stopcard mini"><div class="dayhead">${dnum}<span class="timechip">Arrive ${t}</span></div>
+      <div class="mini-body"><span class="ic">🏁</span>Return to ${EMBARK_FULL[c.embark]}</div></div></div>`;
+  }
+  if(day.type==='sea'){
+    return `<div class="stop"><div class="rail"><span class="node sea"></span>${thread}</div>
+      <div class="stopcard seaday"><div class="dayhead">${dnum}</div>
+      <div class="mini-body"><span class="ic">🌊</span>Day at sea</div></div></div>`;
+  }
+  const p=PORTS[day.key], h=PORT_HOURS[day.key];
+  const time=h ? (h[1]==='late stay'?`${h[0]} – late`:`${h[0]} – ${h[1]}`) : '';
+  return `<div class="stop"><div class="rail"><span class="node port"></span>${thread}</div>
+    <div class="stopcard">
+      <div class="dayhead">${dnum}${time?`<span class="timechip">${time}</span>`:''}</div>
+      <div class="pphoto photo">
+        <div class="pphoto-fallback"><span class="fflag">${p.flag}</span><span class="fname">${p.name.split(',')[0]}</span><span class="fload">loading photo…</span></div>
+        <img class="pphoto-img" alt="${p.name}" referrerpolicy="no-referrer" data-wiki="${p.wiki}">
+        <div class="pgrad"></div>
+        <div class="pflag">${p.flag}</div>
+        <div class="plabel"><span class="pn">${p.name.split(',')[0]}</span><span class="pc">${p.country}</span></div>
+      </div>
+      <div class="pbody"><p>${p.blurb}</p></div>
+    </div></div>`;
+}
+
+function openSheet(c){
+  const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim');
+  const days=buildSchedule(c);
+  const routeHTML=days.map((d,i)=>dayHTML(d,c,i===days.length-1)).join('');
+  const noteHTML=c.note?`<div class="note"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01"/></svg><span>${c.note}</span></div>`:'';
+  sheet.setAttribute('data-c',c.region);
+  sheet.innerHTML=`
+    <div class="sheet-hero" data-c="${c.region}">
+      <div class="sheet-hero-bg"><div class="hero-sky" style="opacity:.5"></div></div>
+      <button class="closebtn" id="closeSheet" aria-label="Close">✕</button>
+      <div class="sheet-hero-inner">
+        <div class="kick">${c.ship} · ${c.region}</div>
+        <h2>${c.nights}-Night ${c.itinerary}</h2>
+        <div class="metarow">
+          <div class="meta"><div class="k">Set sail</div><div class="v">${fmtDate(c)}</div></div>
+          <div class="meta"><div class="k">Return</div><div class="v">${returnDate(c)}</div></div>
+          <div class="meta"><div class="k">From</div><div class="v">${EMBARK_FULL[c.embark]}</div></div>
+          <div class="meta"><div class="k">Ports</div><div class="v">${c.ports.length} stop${c.ports.length>1?'s':''}</div></div>
+        </div>
+      </div>
+    </div>
+    ${noteHTML}
+    <div class="route">
+      <p class="route-h">Day by day · ${c.nights} nights</p>
+      ${routeHTML}
+      <p class="route-cap">Dates are exact for this departure. Port days and times shown are typical for this itinerary — Virgin can adjust the order and hours by sailing, so confirm the final schedule at booking.</p>
+    </div>
+    <div class="sheet-foot">
+      <p class="book disclaim">This voyage is complimentary for the Prime Cardholder and one guest under the Ocean Casino Resort offer — Sea View cabin, non-transferable. Taxes &amp; fees are excluded and due at booking. Upgrades to a higher cabin category are available at the difference in fare, subject to availability. Confirm live dates and details when you book with Virgin Voyages.</p>
+    </div>`;
+  sheet.classList.add('show');scrim.classList.add('show');
+  sheet.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+  sheet.scrollTop=0;
+  document.getElementById('closeSheet').onclick=closeSheet;
+  // lazy-load photos
+  sheet.querySelectorAll('.pphoto-img').forEach(img=>loadPhoto(img,img.dataset.wiki));
+}
+function closeSheet(){
+  const sheet=document.getElementById('sheet'),scrim=document.getElementById('scrim');
+  sheet.classList.remove('show');scrim.classList.remove('show');
+  sheet.setAttribute('aria-hidden','true');document.body.style.overflow='';
+}
+document.getElementById('scrim').onclick=closeSheet;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet();});
+
+render();
+</script>
+</body>
+</html>
